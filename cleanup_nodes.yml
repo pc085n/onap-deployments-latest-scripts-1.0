@@ -1,0 +1,26 @@
+---
+
+#
+
+- name: Clean up and terminate
+  hosts: rancher
+  tasks:
+
+    - name: Clean up rancher
+      include: clean_rancher.yml
+
+#
+
+- hosts: workers
+  tasks:
+
+    - name: Clean up workers
+      include: clean_workers.yml
+
+#
+
+#- hosts: controlplane
+#  tasks:
+
+#    - name: Clean up controls
+#      include: clean_controls.yml

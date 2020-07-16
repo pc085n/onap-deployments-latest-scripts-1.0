@@ -1,0 +1,100 @@
+---
+# tasks file for worker
+- name: Read properties
+  run_once: true
+  include_vars:
+    file: onap-deploy-properties.yml
+    name: properties
+
+- name: TBD
+  debug: var=ansible_facts["all_ipv4_addresses"][0]
+
+- name: read tag variables
+  run_once: true
+  include_vars:
+    file: nfs-tag-map.yml
+    name: tag_map
+
+- name: tag map after reading vaules from file nfs-tag-map.yml
+  run_once: true
+  debug: var=tag_map
+
+- name: read mstr_cmd variable
+  run_once: true
+  include_vars:
+    file: nfs-master.yml
+    name: mstr1
+
+- name: remove quotes
+  set_fact:
+    mstr_cmd: "{{ mstr1 | trim }}"
+
+- name: mstr_cmd variable after reading its value from file nfs-master.yml
+  run_once: true
+  debug: var=mstr_cmd
+
+- name: Check existence of master_nfs_node.sh file
+  stat: 
+    path: master_nfs_node.sh
+  when: ansible_facts["all_ipv4_addresses"][0] == tag_map["{{ properties['node-prefix'] }}-worker-1"]
+  register: sout
+
+- debug: var=sout.stat
+ 
+- name: Copy master_nfs_node.sh
+  become: yes
+  copy:
+    src: master_nfs_node.sh
+    dest: master_nfs_node.sh
+    mode: +x
+  when: ansible_facts["all_ipv4_addresses"][0] == tag_map["{{ properties['node-prefix'] }}-worker-1"] and sout.stat.exists == false
+
+- name: Install network file master service on rrtx-worker-1
+  become: yes
+  command: "{{ item }}"
+  with_items:
+    - ./master_nfs_node.sh "{{ mstr_cmd.slaveips }}"
+  when: ansible_facts["all_ipv4_addresses"][0] == tag_map["{{ properties['node-prefix'] }}-worker-1"] and sout.stat.exists == false
+  register: sout
+
+- debug: var=sout.stat
+
+- name: Check existence of slave_nfs_node.sh file
+  stat: 
+    path: slave_nfs_node.sh
+  when: ansible_facts["all_ipv4_addresses"][0] != tag_map["{{ properties['node-prefix'] }}-worker-1"]
+  register: sout
+
+- debug: var=sout.stat
+ 
+- name: Copy slave_nfs_node.sh
+  become: yes
+  copy:
+    src: slave_nfs_node.sh
+    dest: slave_nfs_node.sh
+    mode: +x
+  when: ansible_facts["all_ipv4_addresses"][0] != tag_map["{{ properties['node-prefix'] }}-worker-1"] and sout.stat.exists == false
+
+###
+- name: construct master_tag
+  run_once: true
+  set_fact:
+    master_tag="{{ properties['node-prefix'] }}-worker-1"
+
+- name: display master_tag
+  run_once: true
+  debug:
+    var: master_tag
+###
+
+- name: Install network file slave service on all but rrtx-worker-1
+  command: "{{ item }}"
+  with_items:
+    - ./slave_nfs_node.sh "{{ tag_map[master_tag] }}"
+#    - ./slave_nfs_node.sh "{{ tag_map['rrtx-worker-1'] }}"
+  when: ansible_facts["all_ipv4_addresses"][0] != tag_map["{{ properties['node-prefix'] }}-worker-1"] and sout.stat.exists == false
+  register: sout2
+
+- debug: var=sout.stat
+    
+

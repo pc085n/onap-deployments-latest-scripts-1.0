@@ -1,0 +1,55 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  vars:
+    cp_instance_type: t2.large
+    wp_instance_type: r5.2xlarge
+    security_group: default
+    image: ami-07c1207a9d40bc3bd
+    keypair: ohio-key-pair
+    region: us-east-2
+    vpc_suid: subnet-3cfdd447
+    startindex: 1
+    count: 3
+    cp_spot_price: 0.0069
+    wp_spot_price: 0.0069
+    cp_volume_size: 30
+    wp_volume_size: 150
+    spot_wait_timeout: 600
+    ec2_count: 0
+    ecw_count: 0
+  vars_files:
+    - aws_keys.yml
+
+  tasks:
+  - name: Read properties
+    run_once: true
+    include_vars:
+      file: onap-deploy-properties.yml
+      name: properties
+
+  - name: Values from onap-release
+    run_once: true
+    debug: var=properties
+
+  - name: Get EC2 instances
+    run_once: true
+    ec2_instance_facts:
+      filters:
+        "tag:Name": "{{ properties['node-prefix'] }}-*"
+        instance-state-name: running
+      region: "{{ region }}"
+      aws_access_key: "{{ aws_access_key }}"
+      aws_secret_key: "{{ aws_secret_key }}"
+    register: ec2cp
+
+  - name: Terminate HA ONAP instances that were previously launched
+    ec2:
+      state: 'absent'
+      instance_id: "{{ item.instance_id }}"
+      region: "{{ region }}"
+      aws_access_key: "{{ aws_access_key }}"
+      aws_secret_key: "{{ aws_secret_key }}"
+    with_items: "{{ ec2cp.instances }}"
+

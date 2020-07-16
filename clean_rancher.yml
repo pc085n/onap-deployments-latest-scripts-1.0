@@ -1,0 +1,55 @@
+  - name: Read properties
+    run_once: true
+    include_vars:
+      file: onap-deploy-properties.yml
+      name: properties
+
+  - name: Values from onap-release
+    run_once: true
+    debug: var=properties
+
+  - name: Remove ONAP namespace
+    command: kubectl delete namespace onap 
+    register: sout
+
+  - debug: var=sout.stdout_lines
+
+  - name: Remove ONAP pods
+    command: kubectl delete pods -n onap --all
+    register: sout
+
+  - debug: var=sout.stdout_lines
+
+  - name: Remove ONAP secrets
+    command: kubectl delete secrets -n onap --all
+    register: sout
+
+  - debug: var=sout.stdout_lines
+
+  - name: Remove ONAP persistentvolumes
+    command: kubectl delete persistentvolumes -n onap --all
+    register: sout
+
+  - debug: var=sout.stdout_lines
+
+  - name: Remove ONAP clusterrolebindings
+    command: kubectl -n onap delete clusterrolebindings --all
+    register: sout
+
+  - debug: var=sout.stdout_lines
+
+  - name: Ensure undeploy permissions
+    become: yes
+    file:
+      path: "{{ properties['helm-directory'] }}undeploy/undeploy.sh"
+      mode: 0755
+
+  - name: Undeploy ONAP
+    shell: helm undeploy onap --purge
+    register: sout
+ 
+  - debug: var=sout.stdout_lines
+
+  - name: Display completed server
+    debug:
+      msg: "Completed {{ansible_host}}" 

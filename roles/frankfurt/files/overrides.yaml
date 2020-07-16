@@ -1,0 +1,24 @@
+global: # global defaults
+  repository: 172.31.33.195:5000
+  dockerhubRepository: 172.31.33.195:5000
+  dockerHubRepository: 172.31.33.195:5000
+  readinessRepository: 172.31.33.195:5000
+  loggingRepository: 172.31.33.195:5000
+  configRepository: 172.31.33.195:5000
+  ubuntuInitRepository: 172.31.33.195:5000
+  busyboxRepository: 172.31.33.195:5000
+  postgresRepository: 172.31.33.195:5000
+  nfsprovisionerRepository: 172.31.33.195:5000
+  xtrabackupRepository: 172.31.33.195:5000
+
+repository: 172.31.33.195:5000
+dockerhubRepository: 172.31.33.195:5000
+dockerHubRepository: 172.31.33.195:5000
+readinessRepository: 172.31.33.195:5000
+loggingRepository: 172.31.33.195:5000
+configRepository: 172.31.33.195:5000
+ubuntuInitRepository: 172.31.33.195:5000
+busyboxRepository: 172.31.33.195:5000
+postgresRepository: 172.31.33.195:5000
+xtrabackupRepository: 172.31.33.195:5000
+nfsprovisionerRepository: 172.31.33.195:5000

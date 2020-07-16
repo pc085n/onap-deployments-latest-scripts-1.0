@@ -1,0 +1,51 @@
+  - name: Read properties
+    run_once: true
+    include_vars:
+      file: onap-deploy-properties.yml
+      name: properties
+
+  - name: Get EC2 rancher instance IDs
+    run_once: true
+    ec2_instance_facts:
+      filters:
+        "tag:Name": "{{ properties['node-prefix'] }}-rancher*"
+        instance-state-name: running
+      region: "{{ region }}"
+      aws_access_key: "{{ aws_access_key }}"
+      aws_secret_key: "{{ aws_secret_key }}"
+    register: ec2ng
+
+  - name: display instances
+    run_once: true
+    debug:
+      var: ec2ng
+
+  - name: count running instances
+    run_once: true
+    set_fact: ec2_count={{ ec2_count | int + 1 }}
+    loop: "{{ ec2ng.instances | default([]) }}"
+
+  - name: display count
+    debug:
+      var: ec2_count
+
+  - name: create new instances
+    include: provision-ec2.yml
+    vars:
+      tag_type: rancher
+      tag_name_prefix: "{{ properties['node-prefix']}}-rancher"
+      host_group: rancher
+      instance_type: t2.xlarge
+      image: ami-07c1207a9d40bc3bd
+      volume_size: 120
+      dev_name: /dev/sda1
+      vol_type: gp2
+      host_count: 1
+    when: ec2_count == 0
+
+  - name: Add existing hosts so that we can further contact it
+    add_host:
+      name: "{{ item.private_ip_address }}"
+      groups: rancher
+    loop: "{{ ec2ng.instances | default([]) }}"
+    when: item.private_ip_address is defined

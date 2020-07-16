@@ -1,0 +1,19 @@
+---
+
+- name: Set up rancher 
+  hosts: rancher
+  roles:
+    - docker
+    - ssh
+    - rancher
+    - kubectl
+    - helm
+    - tiller
+    - nfs-server
+  tasks: 
+
+###
+
+    - name: Display completed ip
+      debug:
+        msg: "Completed {{ansible_host}}" 

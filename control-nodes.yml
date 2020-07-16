@@ -1,0 +1,90 @@
+  - name: Read properties
+    run_once: true
+    include_vars:
+      file: onap-deploy-properties.yml
+      name: properties
+
+  - name: Get EC2 control instance IDs
+    run_once: true
+    ec2_instance_facts:
+      filters:
+        "tag:Name": "{{ properties['node-prefix'] }}-control*"
+        instance-state-name: running
+      region: "{{ region }}"
+      aws_access_key: "{{ aws_access_key }}"
+      aws_secret_key: "{{ aws_secret_key }}"
+    register: ecw
+
+  - name: display instances
+    run_once: true
+    debug:
+      var: ecw
+
+  - name: count running instances
+    run_once: true
+    set_fact: ecw_count={{ ecw_count | int + 1 }}
+    loop: "{{ ecw.instances | default([]) }}"
+    when: item.private_ip_address is defined
+
+  - name: display count
+    debug:
+      var: ecw_count
+
+  - name: create new instances
+    include: provision-ec2.yml
+    vars:
+      tag_type: control
+      tag_name_prefix: "{{ properties['node-prefix'] }}-control"
+      host_group: controlplane
+      instance_type: t2.xlarge
+      image: ami-07c1207a9d40bc3bd
+      volume_size: 120
+      dev_name: /dev/sda1
+      vol_type: gp2
+      host_count: 3
+    when: ecw_count == 0
+
+  - name: Get EC2 facts of control instances
+    run_once: true
+    ec2_instance_facts:
+      filters:
+        "tag:Name": "{{ properties['node-prefix'] }}-control*"
+        instance-state-name: running
+      region: "{{ region }}"
+      aws_access_key: "{{ aws_access_key }}"
+      aws_secret_key: "{{ aws_secret_key }}"
+    register: ecw
+
+  - name: Add existing hosts so that we can further contact it
+    add_host:
+      name: "{{ item.private_ip_address }}"
+      groups: controlplane
+    loop: "{{ ecw.instances | default([]) }}"
+    when: item.private_ip_address is defined
+
+#  - name: Populate tag map
+#    set_fact:
+#      tag_map: "{{ tag_map|default({}) | combine( {item.tags['Name']: item.private_ip_address} ) }}"
+#    with_items: "{{  ecw.instances }}"
+
+#  - name: tag map
+#    debug: var=tag_map
+
+#  - name: Copy map to file
+#    copy:
+#      content: "{{ tag_map }}"
+#      dest: "nfs-tag-map.yml"
+
+#  - name: Populate mstr_cmd
+#    set_fact:
+#      mstr_cmd: "{{ mstr_cmd|default('') + item.private_ip_address + ' '}}"
+#    with_items: "{{  ecw.instances }}"
+#    when: item.private_ip_address != tag_map["{{ properties['node-prefix'] }}-control-1"]
+
+#  - name: master service ips
+#    debug: var=mstr_cmd
+
+#  - name: Copy ips to file
+#    copy:
+#      content: "{{ 'slaveips: ' +  mstr_cmd|quote }}" 
+#      dest: "nfs-master.yml"

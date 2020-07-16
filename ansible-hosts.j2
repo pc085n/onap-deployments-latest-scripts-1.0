@@ -1,0 +1,15 @@
+# ansible host groups #
+[rancher]
+{% for item in ec2ng.instances %}
+{{ item.private_ip_address }}
+{% endfor %}
+
+[workers]
+{% for item in ec2wp.instances %}
+{{ item.private_ip_address }}
+{% endfor %}
+
+[controlplane]
+{% for item in ec2cp.instances %}
+{{ item.private_ip_address }}
+{% endfor %}

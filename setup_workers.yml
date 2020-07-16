@@ -1,0 +1,20 @@
+---
+
+- name: Set up workers 
+  hosts: workers
+  roles:
+    - docker
+    - ssh
+#    - kubectl
+#    - helm
+    - nfs-common
+    - worker
+#    - pnda
+  tasks: 
+
+###
+
+    - name: Display completed ip
+      debug:
+        msg: "Completed {{ansible_host}}"
+

@@ -1,0 +1,29 @@
+---
+# tasks file for helm
+- name: Read properties
+  run_once: true
+  include_vars:
+    file: onap-deploy-properties.yml
+    name: properties
+
+- name: WGET
+  get_url:
+    url: http://storage.googleapis.com/kubernetes-helm/helm-v2.16.6-linux-amd64.tar.gz
+    dest: "{{ properties['baseline-directory'] }}/helm-v2.16.6-linux-amd64.tar.gz"
+
+- name: TAR
+  unarchive:
+    src: "{{ properties['baseline-directory'] }}/helm-v2.16.6-linux-amd64.tar.gz"
+    dest: "{{ properties['baseline-directory'] }}"
+    remote_src: yes
+
+- name: MV helm
+  become: yes
+  command: "mv linux-amd64/helm {{ properties['bin-directory'] }}helm"
+
+#- name: Install Rancher
+#  command: "{{ 'helm install rancher-stable/rancher --name rancher --namespace cattle-system --set hostname=' + ec2ng.instances[0].public_dns_name }}"
+#  register: sout
+
+#- debug: var=sout.stdout_lines
+

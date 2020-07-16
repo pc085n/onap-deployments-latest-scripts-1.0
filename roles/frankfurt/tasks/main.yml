@@ -1,0 +1,130 @@
+---
+# tasks file for frankfurt
+- name: Read properties
+  run_once: true
+  include_vars:
+    file: onap-deploy-properties.yml
+    name: properties
+
+- name: HELM version
+  shell: sudo helm version
+  register: sout
+      
+- debug: var=sout.stdout_lines
+
+#- name: HELM init first
+#  shell: sudo helm init
+#  register: sout
+ 
+#- debug: var=sout.stdout_lines
+
+- name: Remove stable from HELM repo
+  shell: sudo helm repo remove stable
+  register: sout
+  ignore_errors: true
+
+- debug: var=sout.stdout_lines
+
+- name: Copy overrides.yaml file 
+  become: yes
+  copy:
+    src: overrides.yaml
+    dest: "{{ properties['baseline-directory'] }}"
+
+- name: Check if oom exists
+  become: yes
+  stat:
+    path: "{{ properties['oom-directory'] }}"
+  register: oomdir
+
+#sudo git clone -b frankfurt http://gerrit.onap.org/r/oom --recurse-submodules
+- name: Copy oom
+  become: yes
+  copy:
+    src: oom
+    dest: "{{ properties['baseline-directory'] }}"
+  when: oomdir.stat.exists == false
+
+- name: Navigate to kubernetes directory
+  shell: cd oom/kubernetes
+  register: sout
+ 
+- debug: var=sout.stdout_lines
+
+- name: HELM plugins
+  shell: sudo cp -R ~/oom/kubernetes/helm/plugins/ ~/.helm
+  register: sout
+   
+- debug: var=sout.stdout_lines
+
+- name: HELM plugins onap-all
+  shell: sudo cp ~/oom/kubernetes/onap/resources/overrides/onap-all.yaml ~/.
+  register: sout
+
+- debug: var=sout.stdout_lines
+
+- name: HELM plugins openstack
+  shell: sudo cp ~/oom/kubernetes/onap/resources/overrides/openstack.yaml ~/.
+  register: sout
+
+- debug: var=sout.stdout_lines
+
+- name: HELM plugins public-cloud
+  shell: sudo cp ~/oom/kubernetes/onap/resources/environments/public-cloud.yaml ~/.
+  register: sout
+
+- debug: var=sout.stdout_lines
+
+- name: HELM plugins environment
+  shell: sudo cp ~/oom/kubernetes/onap/resources/overrides/environment.yaml ~/.
+  register: sout
+
+- debug: var=sout.stdout_lines
+
+#- name: HELM init second
+#  shell: sudo helm init
+#  register: sout
+
+#- debug: var=sout.stdout_lines
+
+- name: HELM serve
+  shell: sudo helm serve & 
+  async: 45
+  poll: 0
+
+- name: Add local to HELM repo
+  shell: sudo helm repo add local http://127.0.0.1:8879
+  register: sout
+   
+- debug: var=sout.stdout_lines
+
+- name: List HELM repo 
+  shell: sudo helm repo list
+  register: sout
+
+- debug: var=sout.stdout_lines
+
+- name: MAKE all 
+  shell: "sudo make --directory {{ properties['oom-directory'] }}/kubernetes"
+  register: sout
+
+- debug: var=sout.stdout_lines
+
+- name: HELM search
+  shell: sudo helm search -l
+  register: sout
+ 
+- debug: var=sout.stdout_lines
+
+- name: Ensure deploy permissions
+  become: yes
+  file: 
+    path: "{{ properties['helm-directory'] }}deploy/deploy.sh"
+    mode: 0755
+
+- name: Deploy ONAP 
+  shell: "sudo helm deploy onap local/onap --namespace onap --set global.masterPassword=cciOnapPassword -f {{ properties['baseline-directory'] }}/onap-all.yaml -f {{ properties['baseline-directory'] }}/openstack.yaml -f {{ properties['baseline-directory'] }}/environment.yaml -f {{ properties['baseline-directory'] }}/overrides.yaml --timeout 3600"
+#  shell: "sudo helm deploy onap local/onap --namespace onap --set global.masterPassword=cciOnapPassword -f onap/resources/overrides/onap-all.yaml -f onap/resources/overrides/environment.yaml -f onap/resources/overrides/openstack.yaml -f /home/ubuntu/overrides.yaml --timeout 3600"
+  register: sout
+
+- debug: var=sout.stdout_lines

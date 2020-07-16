@@ -1,0 +1,78 @@
+---
+# tasks file for docker
+- name: Read properties
+  run_once: true
+  include_vars:
+    file: onap-deploy-properties.yml
+    name: properties
+
+- name: Install a list of packages
+  become: yes
+  apt:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - software-properties-common
+
+- name: Add an Apt signing key
+  become: yes
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add source repo into sources list
+  become: yes
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
+    state: present
+
+- name: Get update
+  become: yes
+  apt: 
+    update_cache: yes
+
+- name: Install docker
+  become: yes
+  apt:
+    name:
+    - "docker-ce=5:18.09.5~3-0~ubuntu-xenial"
+    - "docker-ce-cli=5:18.09.5~3-0~ubuntu-xenial"
+    state: present
+    force: yes
+
+- name: Add docker group to remote user
+  become: yes
+  user:
+    name: ubuntu
+    group: docker
+    append: yes
+
+- name: Copy daemon.json file to /etc/docker/daemon.json
+  become: yes
+  copy:
+    src: daemon.json
+    dest: "{{ properties['docker-directory'] }}daemon.json"
+  
+- name: Restart docker service
+  become: yes
+  service:
+    name: docker
+    state: restarted
+
+- name: Hold docker-ce
+  become: yes
+  command: apt-mark hold docker-ce
+  register: sout
+
+- debug: var=sout.stdout_lines
+
+- name: Install make
+  become: yes
+  apt: 
+    name: make 
+    state: present
+

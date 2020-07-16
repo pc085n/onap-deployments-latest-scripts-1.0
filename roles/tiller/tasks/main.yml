@@ -1,0 +1,39 @@
+---
+# tasks file for tiller
+
+#- name: Check for serviceaccount tiller
+#  command: kubectl -n kube-system get serviceaccount tiller
+#  register: tiller_result
+#  failed_when: tiller_result.rc == 1
+#  ignore_errors: True
+
+- name: Create service account for Tiller
+  shell: kubectl -n kube-system create serviceaccount tiller
+  register: sout
+#  when: tiller_result is failed
+
+- debug: var=sout.stdout_lines
+#  when: tiller_result is failed
+
+- name: Install tiller using helm
+  command: helm init --service-account tiller
+  register: sout
+#  when: tiller_result is failed
+
+- debug: var=sout.stdout_lines
+#  when: tiller_result is failed
+
+- name: Bind cluster role to Tiller
+  command: kubectl create clusterrolebinding tiller --clusterrole cluster-admin  --serviceaccount=kube-system:tiller
+  register: sout
+#  when: tiller_result is failed
+
+- debug: var=sout.stdout_lines
+#  when: tiller_result is failed
+
+- name: Verify Tiller
+  command: kubectl -n kube-system  rollout status deploy/tiller-deploy
+  register: sout
+
+- debug: var=sout.stdout_lines
+

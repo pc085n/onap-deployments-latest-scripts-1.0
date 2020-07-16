@@ -1,0 +1,113 @@
+---
+# tasks file for kubectl
+
+- name: Read properties
+  run_once: true
+  include_vars:
+    file: onap-deploy-properties.yml
+    name: properties
+
+- name: CURL
+  get_url:
+    url: https://storage.googleapis.com/kubernetes-release/release/v1.15.11/bin/linux/amd64/kubectl
+    dest: ./kubectl
+    mode: 0755
+
+- name: MV kubectl
+  become: yes
+  command: "mv ./kubectl {{ properties['bin-directory'] }}kubectl"
+  register: sout
+
+- debug: var=sout.stdout_lines
+
+- name: MKDIR kube
+  become: yes
+  file:
+    path: "{{ properties['baseline-directory'] }}/.kube"
+    state: directory
+#    mode: 0755
+
+- name: sync up permissions for directory
+  shell: sudo chmod ugo+rwx ~/.kube
+
+- name: Copy kube_config_cluster.yml file
+  become: yes
+  copy:
+    src: "{{ properties['baseline-directory'] }}/kube_config_cluster.yml"
+    dest: "{{ properties['baseline-directory'] }}/.kube/config.onap"
+    remote_src: yes
+#    mode: 0755
+
+- name: sync up permissions for file
+  shell: sudo chmod ugo+rwx ~/.kube/config.onap
+
+#- name: export KUBECONFIG
+#  shell: export KUBECONFIG=~/.kube/config.onap
+#  register: sout
+
+#- debug: var=sout.stdout_lines
+
+- name: define KUBECONFIG
+  become: yes
+  lineinfile: 
+#    dest: /root/.bashrc 
+#    line: 'export KUBECONFIG=~/.kube/config.onap' 
+#    insertafter: 'EOF'
+#
+    dest: /etc/environment
+    insertafter: 'EOF'
+    line: 'KUBECONFIG="/home/ubuntu/.kube/config.onap"'
+#
+#    path: /home/ubuntu/.profile
+#    insertafter: 'export PATH='
+#    line: 'export KUBECONFIG="$HOME/.kube/config.onap"'
+
+- name: refresh environment variable
+  shell: source /etc/environment
+#  shell: source /home/ubuntu/.profile
+#  shell: source ~/.bashrc
+  register: sout
+  args:
+    executable: /bin/bash
+
+- debug: var=sout.stdout_lines
+
+- name: echo KUBECONFIG
+  shell: echo $KUBECONFIG
+  register: sout
+
+- debug: var=sout.stdout_lines
+
+###
+
+#- name: CURL
+#  get_url:
+#    url: https://storage.googleapis.com/kubernetes-release/release/v1.15.11/bin/linux/amd64/kubectl
+#    dest: ./kubectl
+#    mode: 0755
+
+#- name: MV kubectl
+#  become: yes
+#  command: "mv ./kubectl {{ properties['bin-directory'] }}kubectl"
+#  register: sout
+
+#- debug: var=sout.stdout_lines
+
+###
+
+- name: reset ssh to allow user changes to take effect
+  meta: reset_connection
+
+- name: use context
+  shell: kubectl config use-context onap
+#  shell: kubectl config use-context onap --kubeconfig=/home/ubuntu/.kube/config.onap
+  register: sout
+
+- debug: var=sout.stdout_lines
+
+- name: validate deployment
+  shell: kubectl get nodes -o=wide
+  register: sout
+
+- debug: var=sout.stdout_lines
+

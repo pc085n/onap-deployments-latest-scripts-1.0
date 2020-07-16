@@ -1,0 +1,15 @@
+---
+
+- name: Set up controls
+  hosts: controlplane
+  roles:
+    - docker
+    - ssh
+  tasks: 
+
+###
+
+    - name: Display completed ip
+      debug:
+        msg: "Completed {{ansible_host}}"
+

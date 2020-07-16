@@ -1,0 +1,14 @@
+{
+"vault-address": "http://127.0.0.1:8200",
+"vault-token": "s.iEE1xGqjzr08l6MLnLfauHWO",
+"eip-address": "",
+"node-prefix": "rrtx",
+"run-directory":"/opt/app/onap-deployments/latest",
+"baseline-directory": "/home/ubuntu",
+"kubectl-directory": "/home/ubuntu/.kube/",
+"docker-directory": "/etc/docker/",
+"bin-directory": "/usr/local/bin/",
+"ssh-directory": "/home/ubuntu/.ssh/",
+"oom-directory": "/home/ubuntu/oom",
+"helm-directory": "/home/ubuntu/.helm/plugins/"
+}

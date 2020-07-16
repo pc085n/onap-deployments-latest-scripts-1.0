@@ -1,0 +1,8 @@
+---
+# tasks file for pnda
+- name: Load pnda image
+  shell: sudo docker load -i ~/onap-pnda-mirror-container.tar
+  register: sout
+
+- debug: var=sout.stdout_lines
+
