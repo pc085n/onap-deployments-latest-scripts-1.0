@@ -59,7 +59,7 @@
     loop: "{{ ec2onap.instances | default([]) }}"
     when:
       - properties['eip-address'] != ""
-      - host_group == "rancher"
+      - host_group == "nfs"
 
 ###
 

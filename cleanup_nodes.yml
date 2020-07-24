@@ -3,7 +3,7 @@
 #
 
 - name: Clean up and terminate
-  hosts: rancher
+  hosts: nfs
   tasks:
 
     - name: Clean up rancher

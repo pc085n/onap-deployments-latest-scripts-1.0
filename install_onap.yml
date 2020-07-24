@@ -1,0 +1,54 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  vars:
+    security_group: default
+    keypair: ohio-key-pair
+    region: us-east-2
+    vpc_suid: subnet-3cfdd447
+    ec2_count: 0
+    ecw_count: 0
+  vars_files:
+    - aws_keys.yml
+  roles:
+    - aws
+
+  tasks:
+
+###
+   - name: Display completed ip
+     debug:
+       msg: "Completed {{ansible_host}}"
+###
+###
+
+- name: Define controls
+  hosts: controlplane
+  roles:
+    - control 
+  tasks:
+    - name: Display completed ip
+      debug:
+        msg: "Completed {{ansible_host}}"
+
+- name: Define workers
+  hosts: workers
+  roles:
+    - worker 
+  tasks:
+    - name: Display completed ip
+      debug:
+        msg: "Completed {{ansible_host}}"
+
+- name: Define nfs and install ONAP
+  hosts: nfs
+  roles:
+    - nfs 
+    - frankfurt 
+  tasks:
+    - name: Display completed ip
+      debug:
+        msg: "Completed {{ansible_host}}"
+
+###

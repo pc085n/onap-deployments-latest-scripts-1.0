@@ -8,7 +8,7 @@
 #    - kubectl
 #    - helm
     - nfs-common
-    - worker
+    - nfs-share
 #    - pnda
   tasks: 
 

@@ -5,7 +5,8 @@
   roles:
     - docker
     - ssh
-    - rancher
+#    - rancher
+    - rke
     - kubectl
     - helm
     - tiller

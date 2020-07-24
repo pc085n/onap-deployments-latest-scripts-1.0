@@ -1,0 +1,6 @@
+---
+# tasks file for ec2
+- import_tasks: ec2-control.yml
+- import_tasks: ec2-worker.yml
+- import_tasks: ec2-nfs.yml
+- import_tasks: inventory.yml

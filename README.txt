@@ -9,22 +9,14 @@ eval `ssh-agent -s`
 
 ssh-add /home/ubuntu/.ssh/ohio-key-pair.pem
 
-ansible-playbook start_nfs.yml -e 'ansible_python_interpreter=/usr/bin/python3' --vault-password-file=vault-pwd.txt
-
-ansible-playbook setup_controls.yml -i /opt/app/onap-deployments/latest/ansible-hosts.txt -e 'ansible_python_interpreter=/usr/bin/python3' --vault-password-file=vault-pwd.txt
-
-ansible-playbook setup_workers.yml -i /opt/app/onap-deployments/latest/ansible-hosts.txt -e 'ansible_python_interpreter=/usr/bin/python3' --vault-password-file=vault-pwd.txt
-
-ansible-playbook setup_rancher.yml -i /opt/app/onap-deployments/latest/ansible-hosts.txt -e 'ansible_python_interpreter=/usr/bin/python3' --vault-password-file=vault-pwd.txt
-
-ansible-playbook install_onap_rancher.yml -i /opt/app/onap-deployments/latest/ansible-hosts.txt -e 'ansible_python_interpreter=/usr/bin/python3' --vault-password-file=vault-pwd.txt --tags "frankfurt"
+ansible-playbook install_onap.yml -e 'ansible_python_interpreter=/usr/bin/python3' --vault-password-file=vault-pwd.txt
 
 
-To terminate ONAP servers execute the following command:
+To uninstall ONAP servers execute the following command:
 -------------------------------------------------------
 
 
-ansible-playbook terminate_nfs.yml -e 'ansible_python_interpreter=/usr/bin/python3' --vault-password-file=vault-pwd.txt
+ansible-playbook uninstall_onap.yml -e 'ansible_python_interpreter=/usr/bin/python3' --vault-password-file=vault-pwd.txt
 
 
 -------------------------------------------------------

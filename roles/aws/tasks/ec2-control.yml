@@ -1,0 +1,66 @@
+---
+- name: Read properties
+  run_once: true
+  include_vars:
+    file: onap-deploy-properties.yml
+    name: properties
+
+- name: Get EC2 control instance IDs
+  run_once: true
+  ec2_instance_facts:
+    filters:
+      "tag:Name": "{{ properties['node-prefix'] }}-control*"
+      instance-state-name: running
+    region: "{{ region }}"
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+  register: ecw
+
+- name: display instances
+  run_once: true
+  debug:
+    var: ecw
+
+- name: count running instances
+  run_once: true
+  set_fact: ecw_count={{ ecw_count | int + 1 }}
+  loop: "{{ ecw.instances | default([]) }}"
+  when: item.private_ip_address is defined
+
+- name: display count
+  debug:
+    var: ecw_count
+
+- name: create new instances
+  include: ec2-provision.yml
+#  import_tasks: ec2-provision.yml
+  vars:
+    tag_type: control
+    tag_name_prefix: "{{ properties['node-prefix'] }}-control"
+    host_group: controlplane
+    instance_type: t2.xlarge
+    image: ami-07c1207a9d40bc3bd
+    volume_size: 120
+    dev_name: /dev/sda1
+    vol_type: gp2
+    host_count: 3
+  when: ecw_count == 0
+
+- name: Get EC2 facts of control instances
+  run_once: true
+  ec2_instance_facts:
+    filters:
+      "tag:Name": "{{ properties['node-prefix'] }}-control*"
+      instance-state-name: running
+    region: "{{ region }}"
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+  register: ecw
+
+- name: Add existing hosts so that we can further contact it
+  add_host:
+    name: "{{ item.private_ip_address }}"
+    groups: controlplane
+  loop: "{{ ecw.instances | default([]) }}"
+  when: item.private_ip_address is defined
+

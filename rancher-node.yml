@@ -8,7 +8,7 @@
     run_once: true
     ec2_instance_facts:
       filters:
-        "tag:Name": "{{ properties['node-prefix'] }}-rancher*"
+        "tag:Name": "{{ properties['node-prefix'] }}-nfs*"
         instance-state-name: running
       region: "{{ region }}"
       aws_access_key: "{{ aws_access_key }}"
@@ -32,10 +32,11 @@
   - name: create new instances
     include: provision-ec2.yml
     vars:
-      tag_type: rancher
-      tag_name_prefix: "{{ properties['node-prefix']}}-rancher"
-      host_group: rancher
-      instance_type: t2.xlarge
+      tag_type: nfs
+      tag_name_prefix: "{{ properties['node-prefix']}}-nfs"
+      host_group: nfs
+#      instance_type: t2.xlarge
+      instance_type: r5.2xlarge
       image: ami-07c1207a9d40bc3bd
       volume_size: 120
       dev_name: /dev/sda1
@@ -46,6 +47,6 @@
   - name: Add existing hosts so that we can further contact it
     add_host:
       name: "{{ item.private_ip_address }}"
-      groups: rancher
+      groups: nfs
     loop: "{{ ec2ng.instances | default([]) }}"
     when: item.private_ip_address is defined

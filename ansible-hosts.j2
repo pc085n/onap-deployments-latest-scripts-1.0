@@ -1,5 +1,5 @@
 # ansible host groups #
-[rancher]
+[nfs]
 {% for item in ec2ng.instances %}
 {{ item.private_ip_address }}
 {% endfor %}

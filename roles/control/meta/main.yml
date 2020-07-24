@@ -60,5 +60,3 @@ dependencies:
   # if you add dependencies to this list.
   - role: docker
   - role: ssh
-  - role: nfs-common
-  - role: nfs-share

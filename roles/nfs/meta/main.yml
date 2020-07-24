@@ -1,7 +1,7 @@
 galaxy_info:
-  author: your name
-  description: your description
-  company: your company (optional)
+  author: Pearl
+  description: Nfs
+  company: CCI
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value
@@ -60,5 +60,8 @@ dependencies:
   # if you add dependencies to this list.
   - role: docker
   - role: ssh
-  - role: nfs-common
-  - role: nfs-share
+  - role: rke
+  - role: kubectl
+  - role: helm
+  - role: tiller
+  - role: nfs-server
