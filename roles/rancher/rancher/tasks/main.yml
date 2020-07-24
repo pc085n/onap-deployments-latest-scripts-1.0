@@ -1,9 +1,0 @@
----
-# tasks file for rancher
-- name: Install rancher server
-  become: yes
-  command: docker run -d --restart=unless-stopped -p 8080:8080 --name rancher_server rancher/server:v1.6.22
-  register: sout
-
-- debug: var=sout.stdout_lines
-
