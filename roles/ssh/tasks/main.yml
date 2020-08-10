@@ -1,7 +1,13 @@
 ---
 # tasks file for ssh
+- name: Read properties
+  run_once: true
+  include_vars:
+    file: onap-deploy-properties.yml
+    name: properties
+
 - name: copy file
   template:
-    src: /home/ubuntu/.ssh/ohio-key-pair.pem
-    dest: /home/ubuntu/.ssh/ohio-key-pair.pem
+    src: "{{ properties['ssh-directory'] }}ohio-key-pair.pem"
+    dest: "{{ properties['ssh-directory'] }}ohio-key-pair.pem"
 

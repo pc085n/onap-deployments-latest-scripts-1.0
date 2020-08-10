@@ -59,3 +59,29 @@ dependencies:
   # List your role dependencies here, one per line. Be sure to remove the '[]' above,
   # if you add dependencies to this list.
   - role: ec2
+    a: control
+    b: controlplane
+    c: t2.xlarge
+    d: ami-07c1207a9d40bc3bd
+    e: 120
+    f: /dev/sda1
+    g: gp2
+    h: 3
+  - role: ec2
+    a: worker
+    b: workers
+    c: m5a.4xlarge
+    d: ami-07c1207a9d40bc3bd
+    e: 150
+    f: /dev/sda1
+    g: gp2
+    h: 3
+  - role: ec2
+    a: nfs
+    b: nfs
+    c: t2.xlarge
+    d: ami-07c1207a9d40bc3bd
+    e: 160
+    f: /dev/sda1
+    g: gp2
+    h: 1

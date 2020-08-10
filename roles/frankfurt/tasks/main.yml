@@ -57,29 +57,29 @@
    
 - debug: var=sout.stdout_lines
 
-- name: HELM plugins onap-all
-  shell: sudo cp ~/oom/kubernetes/onap/resources/overrides/onap-all.yaml ~/.
-  register: sout
+#- name: HELM plugins onap-all
+#  shell: sudo cp ~/oom/kubernetes/onap/resources/overrides/onap-all.yaml ~/.
+#  register: sout
 
-- debug: var=sout.stdout_lines
+#- debug: var=sout.stdout_lines
 
-- name: HELM plugins openstack
-  shell: sudo cp ~/oom/kubernetes/onap/resources/overrides/openstack.yaml ~/.
-  register: sout
+#- name: HELM plugins openstack
+#  shell: sudo cp ~/oom/kubernetes/onap/resources/overrides/openstack.yaml ~/.
+#  register: sout
 
-- debug: var=sout.stdout_lines
+#- debug: var=sout.stdout_lines
 
-- name: HELM plugins public-cloud
-  shell: sudo cp ~/oom/kubernetes/onap/resources/environments/public-cloud.yaml ~/.
-  register: sout
+#- name: HELM plugins public-cloud
+#  shell: sudo cp ~/oom/kubernetes/onap/resources/environments/public-cloud.yaml ~/.
+#  register: sout
 
-- debug: var=sout.stdout_lines
+#- debug: var=sout.stdout_lines
 
-- name: HELM plugins environment
-  shell: sudo cp ~/oom/kubernetes/onap/resources/overrides/environment.yaml ~/.
-  register: sout
+#- name: HELM plugins environment
+#  shell: sudo cp ~/oom/kubernetes/onap/resources/overrides/environment.yaml ~/.
+#  register: sout
 
-- debug: var=sout.stdout_lines
+#- debug: var=sout.stdout_lines
 
 #- name: HELM init second
 #  shell: sudo helm init
@@ -123,8 +123,8 @@
     mode: 0755
 
 - name: Deploy ONAP 
-  shell: "sudo helm deploy onap local/onap --namespace onap --set global.masterPassword=cciOnapPassword -f {{ properties['baseline-directory'] }}/onap-all.yaml -f {{ properties['baseline-directory'] }}/openstack.yaml -f {{ properties['baseline-directory'] }}/environment.yaml -f {{ properties['baseline-directory'] }}/overrides.yaml --timeout 3600"
-#  shell: "sudo helm deploy onap local/onap --namespace onap --set global.masterPassword=cciOnapPassword -f onap/resources/overrides/onap-all.yaml -f onap/resources/overrides/environment.yaml -f onap/resources/overrides/openstack.yaml -f /home/ubuntu/overrides.yaml --timeout 3600"
+#  shell: "sudo helm deploy onap local/onap --namespace onap --set global.masterPassword=cciOnapPassword -f {{ properties['baseline-directory'] }}/onap-all.yaml -f {{ properties['baseline-directory'] }}/openstack.yaml -f {{ properties['baseline-directory'] }}/environment.yaml -f {{ properties['baseline-directory'] }}/overrides.yaml --timeout 3600"
+  shell: "sudo helm deploy onap local/onap --namespace onap --set global.masterPassword=cciOnapPassword -f {{ properties['oom-directory'] }}/kubernetes/onap/resources/overrides/onap-all.yaml -f {{ properties['oom-directory'] }}/kubernetes/onap/resources/overrides/environment.yaml -f {{ properties['oom-directory'] }}/kubernetes/onap/resources/overrides/openstack.yaml -f {{ properties['baseline-directory'] }}/overrides.yaml --timeout 3600"
   register: sout
 
 - debug: var=sout.stdout_lines

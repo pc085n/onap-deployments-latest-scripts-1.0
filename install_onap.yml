@@ -25,6 +25,8 @@
 
 - name: Define controls
   hosts: controlplane
+  vars: 
+    a: control
   roles:
     - control 
   tasks:

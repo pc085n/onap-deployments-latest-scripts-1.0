@@ -29,13 +29,24 @@
 #- debug: var=sout
 #  when: k8s_result is failed
 
-- name: Copy rke 
-  become: yes
-  copy:
-    src: "{{ properties['run-directory'] }}/rke"
-    dest: "{{ properties['baseline-directory'] }}"
-#    dest: /usr/local/bin
+#- name: Copy rke 
+#  become: yes
+#  copy:
+#    src: "{{ properties['run-directory'] }}/rke"
+#    dest: "{{ properties['baseline-directory'] }}"
+#    mode: a+x
+
+###
+- name: WGET
+  get_url:
+    url: https://github.com/rancher/rke/releases/download/v1.0.6/rke_linux-amd64
+    dest: "{{ properties['baseline-directory'] }}/rke"
     mode: a+x
+
+- name: MV rke
+  become: yes
+  command: "mv {{ properties['baseline-directory'] }}/rke {{ properties['bin-directory'] }}rke"
+###
 
 - name: Copy cluster.yml file
   become: yes
@@ -44,10 +55,9 @@
     dest: "{{ properties['baseline-directory'] }}"
 
 - name: Deploy K8S cluster using RKE
-#  become: yes
-  shell: sudo /home/ubuntu/rke up --config /home/ubuntu/cluster.yml
+#  shell: sudo /home/ubuntu/rke up --config /home/ubuntu/cluster.yml
+  shell: "rke up --config {{ properties['baseline-directory'] }}/cluster.yml"
   register: sout
-#  when: k8s_result is failed
 
 - debug: var=sout.stdout_lines
 #  when: k8s_result is failed
