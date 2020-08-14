@@ -9,7 +9,7 @@
   run_once: true
   ec2_instance_facts:
     filters:
-      "tag:Name": "{{ properties['node-prefix'] }}-{{ a }}*"
+      "tag:Name": "{{ properties['node-prefix'] }}-{{ label }}*"
       instance-state-name: running
     region: "{{ region }}"
     aws_access_key: "{{ aws_access_key }}"
@@ -34,32 +34,53 @@
 - name: create new instances
   include: ec2-provision.yml
   vars:
-    tag_type: "{{ a }}"
-    tag_name_prefix: "{{ properties['node-prefix'] }}-{{ a }}"
-    host_group: "{{ b }}"
-    instance_type: "{{ c }}"
-    image: "{{ d }}"
-    volume_size: "{{ e }}"
-    dev_name: "{{ f }}"
-    vol_type: "{{ g }}"
-    host_count: "{{ h }}"
+    tag_type: "{{ label }}"
+    tag_name_prefix: "{{ properties['node-prefix'] }}-{{ label }}"
+    host_group: "{{ group }}"
+    instance_type: "{{ type }}"
+    image: "{{ img }}"
+    volume_size: "{{ vsize }}"
+    dev_name: "{{ device }}"
+    vol_type: "{{ vtype }}"
+    host_count: "{{ count }}"
   when: ec2_count == 0
 
 - name: Get EC2 facts of instances
   run_once: true
   ec2_instance_facts:
     filters:
-      "tag:Name": "{{ properties['node-prefix'] }}-{{ a }}*"
+      "tag:Name": "{{ properties['node-prefix'] }}-{{ label }}*"
       instance-state-name: running
     region: "{{ region }}"
     aws_access_key: "{{ aws_access_key }}"
     aws_secret_key: "{{ aws_secret_key }}"
   register: ec2
 
+- name: Save control hosts
+  template:
+    src: "{{ properties['run-directory'] }}/ansible-control-hosts.j2"
+    dest: "{{ properties['run-directory'] }}/ansible-hosts.txt"
+  when:
+    - "'{{ label }}' == 'control'"
+
+- name: Save worker hosts
+  template:
+    src: "{{ properties['run-directory'] }}/ansible-worker-hosts.j2"
+    dest: "{{ properties['run-directory'] }}/ansible-hosts.txt"
+  when:
+    - "'{{ label }}' == 'worker'"
+
+- name: Save nfs hosts
+  template:
+    src: "{{ properties['run-directory'] }}/ansible-nfs-hosts.j2"
+    dest: "{{ properties['run-directory'] }}/ansible-hosts.txt"
+  when:
+    - "'{{ label }}' == 'nfs'"
+
 - name: Add existing hosts so that we can further contact it
   add_host:
     name: "{{ item.private_ip_address }}"
-    groups: "{{ a }}s"
+    groups: "{{ label }}s"
   loop: "{{ ec2.instances | default([]) }}"
   when: item.private_ip_address is defined
 
@@ -69,7 +90,7 @@
   include: tag.yml
   vars:
     resource: "{{ ec2 }}"
-    tag_type: "{{ a }}"
+    tag_type: "{{ label }}"
   when:
-    - "'{{ b }}' == 'workers'"
+    - "'{{ label }}' == 'worker'"
 

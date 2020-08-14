@@ -22,7 +22,7 @@
   set_fact:
     mstr_cmd: "{{ mstr_cmd|default('') + item.private_ip_address + ' '}}"
   with_items: "{{  resource.instances }}"
-  when: item.private_ip_address != tag_map["{{ properties['node-prefix'] }}-{{ a }}-1"]
+  when: item.private_ip_address != tag_map["{{ properties['node-prefix'] }}-{{ label }}-1"]
 
 - name: master service ips
   debug: var=mstr_cmd

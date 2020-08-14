@@ -44,7 +44,7 @@
     index_var: index
   args:
     tags:
-      Type: "{{ tag_type }}"
+      Type: "{{ label }}"
       Name: "{{ tag_name_prefix }}-{{ index + 1 }}"
 
 ###

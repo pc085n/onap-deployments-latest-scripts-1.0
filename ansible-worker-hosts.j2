@@ -1,0 +1,5 @@
+# ansible host groups #
+[workers]
+{% for item in ec2.instances %}
+{{ item.private_ip_address }}
+{% endfor %}
