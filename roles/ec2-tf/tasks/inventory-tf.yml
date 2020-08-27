@@ -1,0 +1,50 @@
+---
+- name: Read properties
+  run_once: true
+  include_vars:
+    file: onap-deploy-properties.yml
+    name: properties
+
+- name: Get control EC2 instances
+  run_once: true
+  ec2_instance_facts:
+    filters:
+      "tag:Name": "{{ properties['node-prefix'] }}-control*"
+      instance-state-name: running
+    region: "{{ region }}"
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+  register: ec2cp
+
+- name: Get worker EC2 instances
+  run_once: true
+  ec2_instance_facts:
+    filters:
+      "tag:Name": "{{ properties['node-prefix'] }}-worker*"
+      instance-state-name: running
+    region: "{{ region }}"
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+  register: ec2wp
+
+- name: Get rancher EC2 instance
+  run_once: true
+  ec2_instance_facts:
+    filters:
+      "tag:Name": "{{ properties['node-prefix'] }}-nfs*"
+      instance-state-name: running
+    region: "{{ region }}"
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+  register: ec2ng
+
+- name: Save hosts
+  template:
+    src: "{{ properties['run-directory'] }}/ansible-hosts.j2"
+    dest: "{{ properties['run-directory'] }}/ansible-hosts.txt"
+
+- name: Save RKE cluster 
+  become: yes
+  template:
+    src: "{{ properties['run-directory'] }}/cluster.j2"
+    dest: "{{ properties['run-directory'] }}/cluster.yml"

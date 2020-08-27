@@ -1,0 +1,35 @@
+---
+# tasks file for ec2-tf
+- name: Read properties
+  run_once: true
+  include_vars:
+    file: onap-deploy-properties.yml
+    name: properties
+
+- name: Sync machine time with real time
+  shell: sudo ntpdate us.pool.ntp.org
+  register: sout
+
+- debug: var=sout.stdout_lines
+
+- name: Terraform step init
+  shell: sudo terraform init -var-file="onap-deploy-properties.yml"
+  register: sout
+
+- debug: var=sout.stdout_lines
+
+- name: Terraform step apply
+  shell: sudo terraform apply -var-file="onap-deploy-properties.yml" -auto-approve
+  register: sout
+
+- debug: var=sout.stdout_lines
+
+- import_tasks: ec2-instance-tf.yml
+  vars:
+    region: us-east-2
+
+- import_tasks: inventory-tf.yml
+  vars:
+    region: us-east-2
+#  when:
+#    - "'{{ label }}' == 'worker'"

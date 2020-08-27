@@ -1,0 +1,100 @@
+---
+- name: Read properties
+  run_once: true
+  include_vars:
+    file: onap-deploy-properties.yml
+    name: properties
+
+- name: Get EC2 instance IDs
+  run_once: true
+  ec2_instance_facts:
+    filters:
+#      "tag:Name": "{{ properties['node-prefix'] }}-{{ label }}*"
+      "tag:Name": "{{ properties['node-prefix'] }}-*"
+      instance-state-name: running
+    region: "{{ region }}"
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+  register: ec2
+
+#- name: display instances
+#  run_once: true
+#  debug:
+#    var: ec2
+
+#- name: count running instances
+#  run_once: true
+#  set_fact: ec2_count={{ ec2_count | int + 1 }}
+#  loop: "{{ ec2.instances | default([]) }}"
+#  when: item.private_ip_address is defined
+
+#- name: display count
+#  debug:
+#    var: ec2_count
+
+- name: identify new instances
+  include: ec2-provision-tf.yml
+  vars:
+#    tag_type: "{{ label }}"
+#    tag_name_prefix: "{{ properties['node-prefix'] }}-{{ label }}"
+    resource: "{{ ec2 }}"
+#    host_group: "{{ group }}"
+    ec2_count: 0
+#    instance_type: "{{ type }}"
+#    image: "{{ img }}"
+#    volume_size: "{{ vsize }}"
+#    dev_name: "{{ device }}"
+#    vol_type: "{{ vtype }}"
+#    host_count: "{{ count }}"
+#  when: ec2_count == 0
+
+- name: Get EC2 facts of instances
+  run_once: true
+  ec2_instance_facts:
+    filters:
+#      "tag:Name": "{{ properties['node-prefix'] }}-{{ label }}*"
+      "tag:Name": "{{ properties['node-prefix'] }}-worker*"
+      instance-state-name: running
+    region: "{{ region }}"
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+  register: ec2w
+
+#- name: Save control hosts
+#  template:
+#    src: "{{ properties['run-directory'] }}/ansible-control-hosts.j2"
+#    dest: "{{ properties['run-directory'] }}/ansible-hosts.txt"
+#  when:
+#    - "'{{ label }}' == 'control'"
+
+#- name: Save worker hosts
+#  template:
+#    src: "{{ properties['run-directory'] }}/ansible-worker-hosts.j2"
+#    dest: "{{ properties['run-directory'] }}/ansible-hosts.txt"
+#  when:
+#    - "'{{ label }}' == 'worker'"
+
+#- name: Save nfs hosts
+#  template:
+#    src: "{{ properties['run-directory'] }}/ansible-nfs-hosts.j2"
+#    dest: "{{ properties['run-directory'] }}/ansible-hosts.txt"
+#  when:
+#    - "'{{ label }}' == 'nfs'"
+
+#- name: Add existing hosts so that we can further contact it
+#  add_host:
+#    name: "{{ item.private_ip_address }}"
+#    groups: "{{ item.tags['Type'] }}"
+#  loop: "{{ ec2.instances | default([]) }}"
+#  when: item.private_ip_address is defined
+
+### worker-specific ONLY
+
+- name: construct tag
+  include: tag-tf.yml
+  vars:
+    resource: "{{ ec2w }}"
+#    label: worker
+#  when:
+#    - "'{{ label }}' == 'worker'"
+

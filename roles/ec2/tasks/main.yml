@@ -3,4 +3,4 @@
 - import_tasks: ec2-instance.yml
 - import_tasks: inventory.yml
   when:
-    - "'{{ label }}' == 'worker'"
+    - "'{{ label }}' == 'nfs'"

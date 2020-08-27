@@ -5,7 +5,7 @@
   vars_files:
     - aws_keys.yml
   roles:
-    - aws
+    - ec2-tf
 
   tasks:
 

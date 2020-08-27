@@ -4,12 +4,12 @@
 {{ item.private_ip_address }}
 {% endfor %}
 
-[workers]
+[worker]
 {% for item in ec2wp.instances %}
 {{ item.private_ip_address }}
 {% endfor %}
 
-[controlplane]
+[control]
 {% for item in ec2cp.instances %}
 {{ item.private_ip_address }}
 {% endfor %}

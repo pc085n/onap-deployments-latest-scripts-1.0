@@ -1,0 +1,34 @@
+---
+- name: Read properties
+  run_once: true
+  include_vars:
+    file: onap-deploy-properties.yml
+    name: properties
+
+- name: Populate tag map
+  set_fact:
+    tag_map: "{{ tag_map|default({}) | combine( {item.tags['Name']: item.private_ip_address} ) }}"
+  with_items: "{{  resource.instances }}"
+
+- name: tag map
+  debug: var=tag_map
+
+- name: Copy map to file
+  copy:
+    content: "{{ tag_map }}"
+    dest: "nfs-tag-map.yml"
+
+- name: Populate mstr_cmd
+  set_fact:
+    mstr_cmd: "{{ mstr_cmd|default('') + item.private_ip_address + ' '}}"
+  with_items: "{{  resource.instances }}"
+  when: item.private_ip_address != tag_map["{{ properties['node-prefix'] }}-worker-1"]
+
+- name: master service ips
+  debug: var=mstr_cmd
+
+- name: Copy ips to file
+  copy:
+    content: "{{ 'slaveips: ' +  mstr_cmd|quote }}"
+    dest: "nfs-master.yml"
+

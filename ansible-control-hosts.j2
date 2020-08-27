@@ -1,5 +1,5 @@
 # ansible host groups #
-[controlplane]
+[control]
 {% for item in ec2.instances %}
 {{ item.private_ip_address }}
 {% endfor %}

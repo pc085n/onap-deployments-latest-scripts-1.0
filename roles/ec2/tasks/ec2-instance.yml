@@ -77,12 +77,12 @@
   when:
     - "'{{ label }}' == 'nfs'"
 
-- name: Add existing hosts so that we can further contact it
-  add_host:
-    name: "{{ item.private_ip_address }}"
-    groups: "{{ label }}s"
-  loop: "{{ ec2.instances | default([]) }}"
-  when: item.private_ip_address is defined
+#- name: Add existing hosts so that we can further contact it
+#  add_host:
+#    name: "{{ item.private_ip_address }}"
+#    groups: "{{ label }}s"
+#  loop: "{{ ec2.instances | default([]) }}"
+#  when: item.private_ip_address is defined
 
 ### worker-specific ONLY
 
