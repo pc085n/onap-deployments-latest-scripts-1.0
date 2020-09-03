@@ -69,8 +69,7 @@ dependencies:
                  security_group: default, 
                  keypair: ohio-key-pair,
                  region: us-east-2,
-                 vpc_suid: subnet-3cfdd447,
-                 ec2_count: 0 }
+                 vpc_suid: subnet-3cfdd447 }
   - { role: ec2, label: worker,
                  group: worker,
                  type: m5a.4xlarge,
@@ -82,8 +81,7 @@ dependencies:
                  security_group: default,
                  keypair: ohio-key-pair,
                  region: us-east-2,
-                 vpc_suid: subnet-3cfdd447,
-                 ec2_count: 0 }
+                 vpc_suid: subnet-3cfdd447 }
   - { role: ec2, label: nfs,
                  group: nfs,
                  type: t2.xlarge,
@@ -95,5 +93,4 @@ dependencies:
                  security_group: default,
                  keypair: ohio-key-pair,
                  region: us-east-2,
-                 vpc_suid: subnet-3cfdd447,
-                 ec2_count: 0 }
+                 vpc_suid: subnet-3cfdd447 }

@@ -2,6 +2,8 @@
 - hosts: localhost
   connection: local
   gather_facts: False
+  vars:
+    ec2_count: 0
   vars_files:
     - aws_keys.yml
   roles:
